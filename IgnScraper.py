@@ -16,6 +16,11 @@ from bs4 import BeautifulSoup
 # n64, mac, gcn, dc, ps, ps2, nng
 # *************************************************
 
+platforms = ['xbox-one', 'ps3', 'ps4', 'xbox', 'pc',
+        'xbox-360', 'wii', 'wii-u', '3ds',
+        'new-nintendo-3ds', 'nds', 'nintendo-switch',
+        'vita', 'psp', 'iphone', 'ipad', 'gb', 'gba',
+        'n64', 'mac', 'gcn', 'dc', 'ps', 'ps2', 'nng' ]
 
 def binarySearch(arr, item):
     low = 0
@@ -190,11 +195,7 @@ class IgnScraper:
 
 #Fine classe IGNScraper
 
-platforms = ['xbox-one', 'ps3', 'ps4', 'xbox', 'pc',
-        'xbox-360', 'wii', 'wii-u', '3ds',
-        'new-nintendo-3ds', 'nds', 'nintendo-switch',
-        'vita', 'psp', 'iphone', 'ipad', 'gb', 'gba',
-        'n64', 'mac', 'gcn', 'dc', 'ps', 'ps2', 'nng' ]
+
 
 def scrapertofile(scraper,path):
     '''Writes, for every game in scraper.games, the game to a json file '''
@@ -224,9 +225,10 @@ def IGNdump(path,platform, ngames, buffer=10, offset=0):
     scraper.run(ngames,buffer,offset)
     scrapertofile(scraper,path)
 
-def dumpall(platforms,NUM_DOC,STEP):
+def dumpall(platforms,NUM_DOC,STEP,dirpath):
     '''Dumps NUM_DOC reviews for every platforms in platforms, using a step = STEP'''
     for platform in platforms:
-        path = "collection/"+platform
         for offset in range(0,NUM_DOC,STEP):
-            IGNdump(path,platform,STEP,10,offset)
+            IGNdump(dirpath,platform,STEP,10,offset)
+            
+    
