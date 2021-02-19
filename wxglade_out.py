@@ -168,7 +168,7 @@ class MyFrame(wx.Frame):
         
         query_preprocesser = Preprocesser()
         
-        if wildcards == [] and group != "and":
+        if wildcards == [] and group != "and" and model != "pos_scor":
             #Complete query with the synonyms of each term
             terms = query_preprocesser.stopwords_elim(terms)   
             terms = query_expansion(terms)
@@ -335,8 +335,8 @@ def query_expansion(terms):
 if __name__ == "__main__":
     VettoreRisultati = []
     
-    collectionpath = str(pathlib.Path().parent.absolute()) + "\\docs"
-    indexpath = collectionpath + "\\test3indexdir"
+    collectionpath = str(pathlib.Path().parent.absolute()) + "\\collection"
+    indexpath = collectionpath + "\\indexdir"
     
     try:
         ix = index.open_dir(indexpath)
