@@ -139,7 +139,6 @@ class MyFrame(wx.Frame):
     def cerca(self, event):  # wxGlade: MyFrame.<event_handler>
         
         # cancella i dati già presenti nella lista
-        print("bellaaa")
         self.list_box_1.Clear() 
         global VettoreRisultati
         VettoreRisultati = []
@@ -169,17 +168,17 @@ class MyFrame(wx.Frame):
         
         query_preprocesser = Preprocesser()
         
-        if wildcards == None and group != "and":
+        if wildcards == [] and group != "and":
             #Complete query with the synonyms of each term
             terms = query_preprocesser.stopwords_elim(terms)   
-            terms = self.query_expansion(terms)
+            terms = query_expansion(terms)
             terms = query_preprocesser.lemmatize(terms)
             terms = query_preprocesser.stem(terms)
             terms = list(set(terms))
-            print(terms)
-        else:
-            #Re-add the wildcards after preprocess            
-            queryterms = query_preprocesser.preprocess(" ".join(terms)) + wildcards
+            print(f"Query expanded: {terms}")
+            
+        #Re-add the wildcards after preprocess            
+        queryterms = query_preprocesser.preprocess(" ".join(terms)) + wildcards
             
         global indexpath
         search = Searcher(indexpath,model)
@@ -199,7 +198,7 @@ class MyFrame(wx.Frame):
                 
                 htmlmatch = x.highlights("content", text=x.fields()["description"])
                 if htmlmatch:
-                    htmlmatch = "Found match in: <i>..." + x.highlights("content", text=x.fields()["description"]) + "...</i>"
+                    htmlmatch = " Found match in: <i>..." + x.highlights("content", text=x.fields()["description"]) + "...</i>"
 
                 print("---------")
                 
@@ -309,7 +308,7 @@ class MyApp(wx.App):
 
 # end of class MyApp
 #funzione per query expansion
-def query_expansion(self,terms):
+def query_expansion(terms):
     synonyms = []
     for t_i in terms:    # t_i is target term
         selSense = None
@@ -328,8 +327,9 @@ def query_expansion(self,terms):
                     if (score_i>selScore):
                         selScore = score_i
                         selSense = s_ti
-            
-        synonyms += [l.name() for l in selSense.lemmas() if selSense is not None and l.name()!=t_i]
+        
+        if selSense is not None:
+            synonyms += [l.name() for l in selSense.lemmas() if l.name()!=t_i]
     return terms+synonyms
 
 if __name__ == "__main__":
