@@ -90,7 +90,7 @@ class MyFrame(wx.Frame):
         # global VettoreRisultati
         # VettoreRisultati = [obj1, obj2, obj3]
 
-        self.list_box_1 = wx.html.SimpleHtmlListBox(self.panel_1, wx.ID_ANY) 
+        self.list_box_1 = wx.html.SimpleHtmlListBox(self.panel_1, wx.ID_ANY, choices=[]) 
         sizer_1.Add(self.list_box_1, (4, 0), (13, 8), wx.ALL | wx.EXPAND, 2)
 
         self.label_tempo = wx.StaticText(self.panel_1, wx.ID_ANY, "Ricerca completata in 0.00 ms")
@@ -139,7 +139,8 @@ class MyFrame(wx.Frame):
     def cerca(self, event):  # wxGlade: MyFrame.<event_handler>
         
         # cancella i dati già presenti nella lista
-        self.list_box_1.Clear() 
+        self.list_box_1.Clear()
+        self.list_box_1.SetItems([])
         global VettoreRisultati
         VettoreRisultati = []
         
