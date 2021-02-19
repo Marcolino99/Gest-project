@@ -167,6 +167,10 @@ class MyFrame(wx.Frame):
         search = Searcher(indexpath,model)
         
         search.group(group)
+        
+        if model == "pos_scor":
+            queryterms = ["",queryterms[0]] #lo scoring pos_scor funziona solo con un termine
+        
         search.parse(" ".join(queryterms))
         res = search.search()
         if res.is_empty() == False:
@@ -272,33 +276,7 @@ class MyFrame(wx.Frame):
 class PopupInfo(wx.Frame):
     def __init__(self, sel):
         #apro file json'
-        """
-        with open(f"docs/{VettoreRisultati[sel].path.split('/').pop()}","r") as f:
-            j = json.loads(f.read())
-            titolo = j.get("name","not found")
-            if j.get("id",""):
-                summary = j.get("summary","")
-                storyline = j.get("storyline","")
-                rating = j.get("aggregated_rating", "None")
-            else:
-                summary = j.get("description","")
-                storyline = j.get("content","")
-                rating = j.get("score","")
-            
-            
-        
-        wx.Frame.__init__(self, None, title=titolo)
-        panel = wx.Panel(self,size=(600,500))
-        log = wx.TextCtrl(panel, wx.ID_ANY,size=(600,480),
-                        style = wx.TE_MULTILINE|wx.TE_READONLY)
-        
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(log, 1, wx.ALL|wx.EXPAND, 0)
-        panel.SetSizerAndFit(sizer)
-        log.write(VettoreRisultati[sel].summary)
 
-        self.Show()
-        """
         wx.Frame.__init__(self, None, title=VettoreRisultati[sel].nome, style=wx.DEFAULT_FRAME_STYLE, size=(400,300))
         self.panel = wx.Panel(self)
         sizer_1 = wx.GridBagSizer(5,0)
