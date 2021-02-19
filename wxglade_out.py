@@ -191,7 +191,7 @@ class MyFrame(wx.Frame):
             i = 0 
             for x in res:
                 i +=1
-                obj = OggettoRicerca(i,x.fields()['title'],x.fields()['description'],"",x.fields().get("rating", 0))
+                obj = OggettoRicerca(i,x.fields()['title'],x.fields()['description'],x.fields()["path"],x.fields().get("rating", 0))
                 VettoreRisultati.append(obj)
                 
                 print(x)
@@ -289,17 +289,36 @@ class MyFrame(wx.Frame):
 
 class PopupInfo(wx.Frame):
     def __init__(self, sel):
-        wx.Frame.__init__(self, None, title=VettoreRisultati[sel].nome)
-        self.panel = wx.Panel(self)
-        sizer = wx.GridBagSizer(0,0)
-        txt = wx.StaticText(self.panel, label=VettoreRisultati[sel].summary)
-        sizer.Add(txt, (0,0), (1,1), wx.ALIGN_CENTER, 0)
-        sizer.AddGrowableCol(0)
-        sizer.AddGrowableRow(0)
-        self.panel.SetSizer(sizer)
-        self.Layout()
-        self.Centre()
+        #apro file json'
+        with open(f"docs/{VettoreRisultati[sel].path.split('/').pop()}","r") as f:
+            j = json.loads(f.read())
+            titolo = j.get("name","not found")
+            if j.get("id",""):
+                summary = j.get("summary","")
+                storyline = j.get("storyline","")
+                rating = j.get("aggregated_rating", "None")
+            else:
+                summary = j.get("description","")
+                storyline = j.get("content","")
+                rating = j.get("score","")
+            
+            
+        
+        wx.Frame.__init__(self, None, title=titolo)
+        panel = wx.Panel(self,size=(600,500))
+        log = wx.TextCtrl(panel, wx.ID_ANY,size=(600,480),
+                        style = wx.TE_MULTILINE|wx.TE_READONLY)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(log, 1, wx.ALL|wx.EXPAND, 0)
+        panel.SetSizerAndFit(sizer)
+        log.write(VettoreRisultati[sel].summary)
 
+        self.Show()
+        
+        
+        
+        
 class MyApp(wx.App):
     def OnInit(self):
         self.frame = MyFrame(None, wx.ID_ANY, "")
