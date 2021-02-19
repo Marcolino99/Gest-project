@@ -158,6 +158,10 @@ class AutocompleteTextCtrl(wx.TextCtrl):
 
         elif key in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and self.popup.Shown:
             self.skip_event = True
+            if self.popup.GetSelectedSuggestion() == "":
+                self.SetInsertionPointEnd()
+                self.popup.Hide()
+                return
             if self.append_mode:
                 self.AppendValue(self.popup.GetSelectedSuggestion())
             else:
@@ -208,12 +212,12 @@ class AutocompleteTextCtrl(wx.TextCtrl):
 
     def AppendValue(self, selection_suggestion):
         value = self.GetValue().lower()
-        selection = selection_suggestion.lower()
+        selection = str(selection_suggestion)[2:-1].lower()
         maxpos = 0
         for i in range(1, len(value) + 1):
             send = value[-i:]
             if selection.startswith(send):
                 maxpos = i
         self.SetValue(
-            self.GetValue()[:len(value) - maxpos] + selection_suggestion
+            self.GetValue()[:len(value) - maxpos] + str(selection_suggestion)[2:-1]
         )

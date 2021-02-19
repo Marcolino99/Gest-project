@@ -26,11 +26,11 @@ import pathlib
 class MyFrame(wx.Frame):
     def __init__(self, *args, **kwds):
         # begin wxGlade: MyFrame.__init__
-        kwds["style"] = kwds.get("style", 0)
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args,size = (1000,440), **kwds)
         
         self.SetTitle("Game Searcher")
-        #self.SetIcon(wx.Icon("icon.png"))
+        self.SetIcon(wx.Icon("icon.png"))
 
         self.panel_1 = wx.Panel(self, wx.ID_ANY)
 
@@ -43,8 +43,8 @@ class MyFrame(wx.Frame):
         label_inserisci = wx.StaticText(self.panel_1, wx.ID_ANY, "Inserisci la query:")
         sizer_1.Add(label_inserisci, (1, 0), (1, 1), wx.EXPAND | wx.LEFT, 4)
 
-        #self.query = wx.TextCtrl(self.panel_1, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
-        self.query = AutocompleteTextCtrl(parent=self.panel_1, completer=self.completer)
+        self.query = AutocompleteTextCtrl(parent=self.panel_1, completer=self.completer, append_mode=True)
+        self.query.SetToolTip(wx.ToolTip("Inserisci i termini che vuoi cercare tra i titoli e le descrizioni dei giochi.\nSono supportate le query-expansion"))
         sizer_1.Add(self.query, (2, 0), (1, 6), wx.EXPAND | wx.LEFT | wx.TOP, 2)
 
         sizer_1.Add(5, 20, (2, 6), (1, 1), wx.ALL | wx.EXPAND, 1)
@@ -57,43 +57,38 @@ class MyFrame(wx.Frame):
         self.tipo_ricerca = wx.Choice(self.panel_1, wx.ID_ANY, choices=self.choices)
         self.tipo_ricerca.SetMinSize((200, 30))
         self.tipo_ricerca.SetSelection(0)
+        self.tipo_ricerca.SetToolTip(wx.ToolTip("Seleziona la modalità di ricerca da utilizzare:\npos_scor:    \ntf_idf:    \nBM25:    "))
         sizer_1.Add(self.tipo_ricerca, (3, 0), (1, 1), wx.EXPAND | wx.TOP, 2)
     
-
-        """Per le 3 checkbox fai scegliere la modalità (and, or, or ponderato (ricorda di mettere le label ti spiegazione))"""
         self.radio_1 = wx.RadioButton(self.panel_1, wx.ID_ANY, "OR", style=wx.RB_GROUP)
+        self.radio_1.SetToolTip(wx.ToolTip("Ricerca tra i documenti contenenti almeno una parola della query dando priorità a quelli più eterogenei"))
         sizer_1.Add(self.radio_1, (3, 1), (1, 1), wx.RIGHT | wx.TOP, 4)
 
         self.radio_2 = wx.RadioButton(self.panel_1, wx.ID_ANY, "AND")
+        self.radio_2.SetToolTip(wx.ToolTip("Ricerca tra i documenti contenenti tutte le parole della query"))
         sizer_1.Add(self.radio_2, (3, 2), (1, 1), wx.RIGHT | wx.TOP, 4)
 
         self.radio_3 = wx.RadioButton(self.panel_1, wx.ID_ANY, "OR ponderato")
+        self.radio_3.SetToolTip(wx.ToolTip("Ricerca tra i documenti contenenti almeno una parola della query senza tener conto dell'eterogeneità"))
         sizer_1.Add(self.radio_3, (3, 3), (1, 1), wx.RIGHT | wx.TOP, 4)
 
         self.button_1 = wx.Button(self.panel_1, wx.ID_ANY, "importa")
         self.button_1.SetMinSize((75, 29))
+        self.button_1.SetToolTip(wx.ToolTip("Importa i risultati di una ricerca precedentemente salvata"))
         sizer_1.Add(self.button_1, (3, 4), (1, 1), wx.LEFT | wx.RIGHT | wx.TOP, 4)
 
         self.button_2 = wx.Button(self.panel_1, wx.ID_ANY, "esporta")
         self.button_2.SetMinSize((75, 29))
-        #self.button_2.Enable(False)
+        self.button_2.Enable(False)
+        self.button_2.SetToolTip(wx.ToolTip("Esporta i risultati della ricerca attuale su file"))
         sizer_1.Add(self.button_2, (3, 5), (1, 1), wx.LEFT | wx.TOP, 4)
 
         sizer_1.Add(5, 20, (3, 6), (1, 1), wx.ALL | wx.EXPAND, 1)
 
-
-
-        # """Prova funzionamento oggetti e vettore di oggetti"""
-        # obj1 = OggettoRicerca(1,"primo","descrizione sensata","03-07-1999",5)
-        # obj2 = OggettoRicerca(2,"secondo","descrizione sensata 2","03-07-1999",2)
-        # obj3 = OggettoRicerca(3,"terzo","descrizione sensata 3","03-07-1999",1)
-        # global VettoreRisultati
-        # VettoreRisultati = [obj1, obj2, obj3]
-
         self.list_box_1 = wx.html.SimpleHtmlListBox(self.panel_1, wx.ID_ANY, choices=[]) 
         sizer_1.Add(self.list_box_1, (4, 0), (13, 8), wx.ALL | wx.EXPAND, 2)
 
-        self.label_tempo = wx.StaticText(self.panel_1, wx.ID_ANY, "Ricerca completata in 0.00 ms")
+        self.label_tempo = wx.StaticText(self.panel_1, wx.ID_ANY, "Ricerca completata in 0.00 ms", style=wx.ALIGN_CENTER_HORIZONTAL)
         self.label_tempo.SetFont(wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, 0, ""))
         self.label_tempo.Hide()
         sizer_1.Add(self.label_tempo, (17, 0), (1, 8), wx.RESERVE_SPACE_EVEN_IF_HIDDEN | wx.ALIGN_CENTER, 0)
@@ -111,10 +106,6 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.cerca, self.Cerca)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.summary, self.list_box_1)
         
-        # end wxGlade  
-
-
-
     def abilitaCerca(self, event):
         """abilita il tasto "Cerca" solo quando è presente del testo nel campo query"""
         if self.query.GetLineText(0) == "":
@@ -122,21 +113,18 @@ class MyFrame(wx.Frame):
         else:
             self.Cerca.Enable(True)
     
-        
     def completer(self, val):
-        # da effettuare parsing / stemming o roba sul testo della query, guarda roba di marco
-        sugg = list(reader.expand_prefix("keywords", self.query.GetLineText(0)))
+        sugg = list(reader.expand_prefix("keywords", val.split(" ")[-1]))
+        if sugg:
+            sugg = [""] + sugg
         return sugg, sugg
         
-        
-        
-
     def summary(self, event):
         """mostra il popup con il summary / descrizione"""
         popup = PopupInfo(self.list_box_1.GetSelection())
         popup.Show()
 
-    def cerca(self, event):  # wxGlade: MyFrame.<event_handler>
+    def cerca(self, event):
         
         # cancella i dati già presenti nella lista
         self.list_box_1.Clear()
@@ -145,12 +133,6 @@ class MyFrame(wx.Frame):
         VettoreRisultati = []
         
         start_time = time.time()
-        
-        # TODO: implementa il controllo dello spelling (forse intendevi...) -> usi un thesaurus (wordnet) -> whoosh
-        # TODO: implementa la possibilità di usare le regex
-        
-        # TODO: gestisci il vettore coi risultati (elimina ad ogni ricerca, popola il vettore ad ogni ricerca ecc..)
-        # TODO: chiedi di aggiungere campi all'hit per popolare il vettore ecc.. -> cambia l'export e l'import accordingly
         
         if self.radio_1.GetValue():
             group = "factory_or"
@@ -206,23 +188,23 @@ class MyFrame(wx.Frame):
                 self.list_box_1.Append(x.fields().get('title') + htmlmatch)
                 text_label = f"Ricerca completata in {(time.time() - start_time) * 1000:.2f} ms"
         else:
+            text_label = "Non ho trovato alcun risultato"
             
-                text_label = "Non ho trovato alcun risultato"
-                
-                #Query correction, Did you mean?
-                corrector = search.searcher.corrector("keywords")
-                eds = []
-                for term in plain.split(" "):
-                    #print(search.searcher.suggest("keywords",terms))
-                    sugg = corrector.suggest(term,limit=3)
-                    if sugg != []:
-                        eds = [(edit_distance(s,term),s,term) for s in sugg]
-                        finalsugg = min(eds, key = lambda x: x[0])
-                        text_label += f" forse cercavi: ...{finalsugg[1]}?"
+            #Query correction, Did you mean?
+            corrector = search.searcher.corrector("keywords")
+            eds = []
+            for term in plain.split(" "):
+                #print(search.searcher.suggest("keywords",terms))
+                sugg = corrector.suggest(term,limit=3)
+                if sugg != []:
+                    eds = [(edit_distance(s,term),s,term) for s in sugg]
+                    finalsugg = min(eds, key = lambda x: x[0])
+                    text_label += f" forse cercavi: ...{finalsugg[1]}?" 
 
                     
         self.label_tempo.Show()
         self.label_tempo.SetLabel(text_label)
+        self.panel_1.Layout()
         
         
         # abilita o disabilita il bottone "esporta"
@@ -248,6 +230,7 @@ class MyFrame(wx.Frame):
         dlg.Destroy()      
         
         self.list_box_1.Clear()
+        self.list_box_1.SetItems([])
         global VettoreRisultati
         VettoreRisultati = []
         
@@ -259,12 +242,11 @@ class MyFrame(wx.Frame):
             idg = vals[0]
             nome = vals[1]
             summary = vals[2]
-            data = vals[3]
+            path = vals[3]
             rating = vals[4]
-            VettoreRisultati.append(OggettoRicerca(idg,nome,summary,data,rating))
+            VettoreRisultati.append(OggettoRicerca(idg,nome,summary,path,rating))
             self.list_box_1.Append(VettoreRisultati[-1].nome+"\t\t"+VettoreRisultati[-1].rating*'*')
-        f.close()
-        
+        f.close()      
         
         
     def esporta(self, event):
@@ -290,6 +272,7 @@ class MyFrame(wx.Frame):
 class PopupInfo(wx.Frame):
     def __init__(self, sel):
         #apro file json'
+        """
         with open(f"docs/{VettoreRisultati[sel].path.split('/').pop()}","r") as f:
             j = json.loads(f.read())
             titolo = j.get("name","not found")
@@ -315,9 +298,26 @@ class PopupInfo(wx.Frame):
         log.write(VettoreRisultati[sel].summary)
 
         self.Show()
+        """
+        wx.Frame.__init__(self, None, title=VettoreRisultati[sel].nome, style=wx.DEFAULT_FRAME_STYLE, size=(400,300))
+        self.panel = wx.Panel(self)
+        sizer_1 = wx.GridBagSizer(5,0)
+        titolo = wx.StaticText(self.panel, wx.ID_ANY, f"{VettoreRisultati[sel].nome}")
+        titolo.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
+        sizer_1.Add(titolo, (0, 0), (1, 1), wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 10)
         
-        
-        
+        descrizione = wx.StaticText(self.panel, wx.ID_ANY, f"{VettoreRisultati[sel].summary}")
+        descrizione.Wrap(self.GetSize()[0]-20)
+        sizer_1.Add(descrizione, (1, 0), (1, 1), wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+
+        rating = wx.StaticText(self.panel, wx.ID_ANY, f"Rating: {VettoreRisultati[sel].rating*'*'}")
+        sizer_1.Add(rating, (2, 0), (1, 1), wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+
+        sizer_1.AddGrowableRow(1)
+        self.panel.SetSizer(sizer_1)
+
+        sizer_1.Fit(self)
+        self.Layout()
         
 class MyApp(wx.App):
     def OnInit(self):
@@ -326,7 +326,6 @@ class MyApp(wx.App):
         self.frame.Show()
         return True
 
-# end of class MyApp
 #funzione per query expansion
 def query_expansion(terms):
     synonyms = []
@@ -357,6 +356,7 @@ if __name__ == "__main__":
     
     collectionpath = str(pathlib.Path().parent.absolute()) + "\\collection"
     indexpath = collectionpath + "\\indexdir"
+
     
     try:
         ix = index.open_dir(indexpath)
