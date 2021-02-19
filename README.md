@@ -15,7 +15,7 @@ di documenti per ogni piattaforma.
 
 **ATTENZIONE**: Nonostante sia possibile scaricare file sia dal sito www.ign.com sia utilizzando le API di igdb, da quickdump.py
 quest\'ultima opzione non è disponibile perchè sarebbe necessario rinnovare il token di accesso alle api tramite un SecretId di twitch personale
-di un membro del gruppo.
+di un membro del gruppo, anche se è implementata nel progetto e funzionante.
 
 ### Program Launch
 
